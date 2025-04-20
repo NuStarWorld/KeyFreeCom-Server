@@ -94,6 +94,7 @@ class TCPServer(Server):
     def check_register(self, dict_data):
         user_phone = dict_data["user_phone"]
         check_result = self.mysql.get_user_info(user_phone=user_phone)
+        self.debug.debug_info("检查注册结果:" + str(check_result))
         if check_result is None:
             self.mysql.register(user_phone=user_phone,level=0,lastIP=dict_data["ip"])
 
@@ -114,6 +115,7 @@ class TCPServer(Server):
         user_id = self.mysql.get_user_info(user_phone=dict_data["user_phone"])["user_id"]
         result = self.mysql.get_user_groups(user_id=user_id)
         result["dst_ip"] = dict_data["ip"]
+        result["sender_id"] = user_id
         self.send_msg(result, self.get_tcp_client_socket(dict_data["ip"]), SendMode.ENCRYPT)
 
     @managers.callback_manager.register("create_group")

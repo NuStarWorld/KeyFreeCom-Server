@@ -3,4 +3,4 @@ MySQL:
   port: 3306
   user: root
   passwd: root
-  database: keyfreecom
+  database: keycomfree
