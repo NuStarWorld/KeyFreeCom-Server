@@ -43,6 +43,9 @@ class MySQL:
 
     def get_user_groups(self, **kwargs):
         return self.soft.get_user_groups(**kwargs)
+
+    def get_recent_msg(self, **kwargs):
+        return self.soft.get_recent_messages(**kwargs)
     """
     软件接口
     """
@@ -236,8 +239,8 @@ class MySQL:
                 SELECT message_id, sender_id, content, sent_at 
                 FROM group_messages 
                 WHERE group_number = %s 
-                ORDER BY sent_at DESC 
-                LIMIT 10
+                ORDER BY sent_at ASC 
+                LIMIT 50
                 """
             try:
                 self.cursor.execute(sql, (kwargs["group_number"],))
@@ -246,9 +249,24 @@ class MySQL:
                 # 将结果转为字典列表（字段名映射）
                 columns = [col[0] for col in self.cursor.description]
                 result = [dict(zip(columns, row)) for row in messages]
-
+                recent_msg = {
+                    "data": {
+                        "result": "success",
+                        "messages": {}
+                    },
+                    "type": "get_recent_msg"
+                }
+                index = 0
+                for data in result:
+                    recent_msg["data"]["messages"][index] = {
+                        "message_id": data["message_id"],
+                        "sender_id": data["sender_id"],
+                        "content": data["content"],
+                        "sent_at": data["sent_at"].isoformat()
+                    }
+                    index += 1
                 print(f"获取群组 {kwargs['group_number']} 的 {len(result)} 条最新消息")
-                return result
+                return recent_msg
             except Exception as ex:
                 print(f"查询消息失败：{ex}")
                 return []

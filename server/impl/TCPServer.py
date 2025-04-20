@@ -135,6 +135,14 @@ class TCPServer(Server):
         self.client_manager.get_client(dict_data["ip"]).set_user_phone(dict_data["user_phone"])
         self.debug.debug_info("客户端完成密钥协商" + self.client_manager.get_client(dict_data["ip"]).to_string())
 
+    @managers.callback_manager.register("get_recent_msg")
+    def get_recent_msg(self,dict_data):
+        result = run(managers.soft_manager.get_recent_msg_soft,
+                     group_number=dict_data["group_number"])
+        result["dst_ip"] = dict_data["ip"]
+        self.send_msg(result, self.get_tcp_client_socket(dict_data["ip"]), SendMode.ENCRYPT)
+
+
     @managers.callback_manager.register("send_data")
     def send_user_msg(self, dict_data):
         run(managers.soft_manager.chat_soft, data=dict_data)
