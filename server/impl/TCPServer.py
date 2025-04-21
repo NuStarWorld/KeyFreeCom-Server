@@ -147,6 +147,14 @@ class TCPServer(Server):
     def send_user_msg(self, dict_data):
         run(managers.soft_manager.chat_soft, data=dict_data)
 
+    @managers.callback_manager.register("join_group")
+    def join_group(self, dict_data):
+        result = run(managers.soft_manager.join_group_soft,
+                     group_number=dict_data["group_number"],
+                     user_id=dict_data["user_id"])
+        result["dst_ip"] = dict_data["ip"]
+        self.send_msg(result, self.get_tcp_client_socket(dict_data["ip"]), SendMode.ENCRYPT)
+
     @managers.callback_manager.register("encrypt_msg")
     def decrypt_msg(self, dict_data):
         pass

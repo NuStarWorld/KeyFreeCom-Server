@@ -46,6 +46,8 @@ class MySQL:
 
     def get_recent_msg(self, **kwargs):
         return self.soft.get_recent_messages(**kwargs)
+    def join_group(self, **kwargs):
+        return self.soft.join_group(**kwargs)
     """
     软件接口
     """
@@ -151,16 +153,33 @@ class MySQL:
                 ))
                 self.conn.commit()
                 print(f"用户 {kwargs['user_id']} 成功加入群组 {kwargs['group_number']}")
-                return True
+                return {
+                    "data": {
+                        "result": "success"
+                    },
+                    "type": "join_group"
+                }
             except Exception as ex:
                 self.conn.rollback()
                 # 根据错误类型细化提示
                 if "Duplicate entry" in str(ex):
                     print(f"用户 {kwargs['user_id']} 已在群组 {kwargs['group_number']} 中")
+                    return {
+                        "data": {
+                            "result": "failed",
+                            "reason": "用户已加入该群组"
+                        },
+                        "type": "join_group"
+                    }
                 else:
                     print(f"加入群组失败：{ex}")
-                return False
-
+                    return {
+                        "data": {
+                            "result": "failed",
+                            "reason": "加入群组失败"
+                        },
+                        "type": "join_group"
+                    }
         """获取用户加入的所有群组"""
         def get_user_groups(self, **kwargs):
             # SQL 联查群组表和成员表
